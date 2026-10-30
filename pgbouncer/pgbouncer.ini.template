@@ -1,0 +1,49 @@
+;; pgbouncer in front of the current primary.
+;; GENERATED FILE — do not edit; edit pgbouncer.ini.template instead.
+;; switchover = PAUSE -> edit the port below -> RELOAD -> RESUME
+
+[databases]
+; the application connects here: host=127.0.0.1 port=6432 dbname=appdb
+appdb = host=127.0.0.1 port=5432 dbname=postgres
+
+[pgbouncer]
+listen_addr = 127.0.0.1
+listen_port = 6432
+unix_socket_dir = @BASE@/pgbouncer
+pidfile = @BASE@/pgbouncer/pgbouncer.pid
+logfile = @BASE@/pgbouncer/pgbouncer.log
+
+;; ---- auth ----
+auth_type = trust
+auth_file = @BASE@/pgbouncer/userlist.txt
+; pgbadmin exists ONLY in userlist.txt (pgbouncer-internal account,
+; used for the admin console); the app user is the invoking OS user
+; (PGUSER/$(whoami)), written into userlist.txt by setup.
+admin_users = pgbadmin
+stats_users = pgbadmin
+
+;; ---- pooling ----
+; REQUIRED for the drain semantics: PAUSE waits for open *transactions*,
+; a server conn is handed back the moment its transaction commits.
+pool_mode = transaction
+
+; 5 tx/sec x 10s hold = ~50 concurrent txs; size the pool above that
+default_pool_size = 64
+reserve_pool_size = 16
+reserve_pool_timeout = 3
+; how many paused/buffered client connections may queue at once
+max_client_conn = 500
+; how long a buffered (paused) client may sit before being dropped;
+; this is the knob that interacts with application-side timeouts.
+; our workers stall up to ~15s during a pause, so be generous
+query_wait_timeout = 120
+max_prepared_statements = 200
+
+;; housekeeping
+server_idle_timeout = 60
+server_lifetime = 3600
+ignore_startup_parameters = extra_float_digits,options
+
+log_connections = 0
+log_disconnections = 0
+log_pooler_errors = 1

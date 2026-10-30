@@ -1,0 +1,19 @@
+# postgres data dirs & runtime state (contain generated files and local paths)
+db1/
+db2/
+.s.PGSQL*
+*_ctl.log
+
+# generated pgbouncer runtime files (template stays in git)
+pgbouncer/pgbouncer.ini
+pgbouncer/userlist.txt
+pgbouncer/pgbouncer.log
+pgbouncer/pgbouncer.pid
+pgbouncer/.s.PGSQL*
+
+# build/test artifacts
+switchovertest
+load.log
+
+# editor/agent config
+opencode.jsonc
